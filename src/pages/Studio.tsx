@@ -237,8 +237,17 @@ const Studio = () => {
                       {p.result ? (
                         <Button size="sm" variant="ghost" onClick={() => downloadOne(p)} className="h-7 px-2"><Download className="w-3.5 h-3.5" /></Button>
                       ) : (
-                        <Button size="sm" variant="ghost" onClick={() => generateOne(p)} disabled={p.status === "loading"} className="h-7 px-2">
-                          <Wand2 className="w-3.5 h-3.5" />
+                        <Button
+                          size="sm"
+                          onClick={() => generateOne(p)}
+                          disabled={p.status === "loading"}
+                          className="h-8 px-3 rounded-full bg-warm text-white hover:opacity-90 shadow-glow"
+                        >
+                          {p.status === "loading" ? (
+                            <><Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> …</>
+                          ) : (
+                            <><Wand2 className="w-3.5 h-3.5 mr-1" /> Générer</>
+                          )}
                         </Button>
                       )}
                     </div>
