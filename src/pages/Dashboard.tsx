@@ -3,23 +3,121 @@ import { useEffect, useMemo, useState } from "react";
 import { loadHistory, type GenRecord } from "@/lib/history";
 import { SOLS } from "@/data/sols";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
-import { Camera, Heart, Clock, Zap } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Camera, Heart, Clock, Zap, Check, Sparkles, Loader2 } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import type { User } from "@supabase/supabase-js";
+import { toast } from "sonner";
 
 const MONTHS = ["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"];
 
+interface Plan {
+  id: string;
+  name: string;
+  tagline: string;
+  price: string;
+  period: string;
+  quota: string;
+  features: string[];
+  cta: string;
+  popular?: boolean;
+  highlight?: boolean;
+}
+
+const PLANS: Plan[] = [
+  {
+    id: "free",
+    name: "Gratuit",
+    tagline: "Découverte",
+    price: "0€",
+    period: "Pour tester sans engagement",
+    quota: "2 photos offertes à l'inscription",
+    features: ["2 photos offertes", "Tous les sols", "Sans carte bancaire"],
+    cta: "Commencer",
+  },
+  {
+    id: "essential",
+    name: "Essentiel",
+    tagline: "Le plus populaire",
+    price: "16,99€",
+    period: "/ mois",
+    quota: "200 photos / mois",
+    features: ["200 photos par mois", "Tous les sols", "Export HD", "Support prioritaire"],
+    cta: "Choisir Essentiel",
+    popular: true,
+  },
+  {
+    id: "pro",
+    name: "Pro",
+    tagline: "Pour les pros",
+    price: "29,99€",
+    period: "/ mois",
+    quota: "500 photos / mois",
+    features: ["500 photos par mois", "Tous les sols", "Export 4K", "Watermark personnalisé"],
+    cta: "Choisir Pro",
+  },
+  {
+    id: "business",
+    name: "Entreprise",
+    tagline: "Pour les équipes",
+    price: "49,99€",
+    period: "/ mois",
+    quota: "1000 photos / mois",
+    features: ["1000 photos par mois", "Multi-utilisateurs", "API access", "Support dédié"],
+    cta: "Choisir Entreprise",
+  },
+  {
+    id: "lifetime",
+    name: "Lifetime",
+    tagline: "Photos illimitées",
+    price: "79,99€",
+    period: "/ mois",
+    quota: "Photos à l'infini",
+    features: ["Photos illimitées", "Toutes les fonctionnalités", "Accès anticipé nouveautés", "Support VIP"],
+    cta: "Passer Lifetime",
+    highlight: true,
+  },
+];
+
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState<User | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const [history, setHistory] = useState<GenRecord[]>([]);
-  useEffect(() => { setHistory(loadHistory()); }, []);
+  const [profile, setProfile] = useState<{ display_name: string | null; avatar_url: string | null } | null>(null);
+
+  useEffect(() => {
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUser(session?.user ?? null);
+      if (!session) navigate("/auth", { replace: true });
+    });
+    supabase.auth.getSession().then(({ data }) => {
+      setUser(data.session?.user ?? null);
+      setAuthChecked(true);
+      if (!data.session) navigate("/auth", { replace: true });
+    });
+    return () => sub.subscription.unsubscribe();
+  }, [navigate]);
+
+  useEffect(() => {
+    if (!user) return;
+    setHistory(loadHistory());
+    supabase
+      .from("profiles")
+      .select("display_name, avatar_url")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => setProfile(data));
+  }, [user]);
 
   const stats = useMemo(() => {
     const total = history.length;
     const solCount: Record<string, number> = {};
     history.forEach(h => { solCount[h.sol] = (solCount[h.sol] || 0) + 1; });
     const favSolId = Object.entries(solCount).sort((a, b) => b[1] - a[1])[0]?.[0];
-    const favSol = SOLS.find(s => s.id === favSolId) || SOLS[0];
-    const minutesSaved = Math.round(total * 4.5); // ~4.5 min saved per pic
+    const favSol = favSolId ? SOLS.find(s => s.id === favSolId) : null;
+    const minutesSaved = Math.round(total * 4.5);
     return { total, favSol, minutesSaved, lastWeek: history.filter(h => h.at > Date.now() - 7*864e5).length };
   }, [history]);
 
@@ -38,25 +136,53 @@ const Dashboard = () => {
     return arr;
   }, [history]);
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/auth", { replace: true });
+  };
+
+  const handleSelectPlan = (plan: Plan) => {
+    toast.info(`Plan ${plan.name} sélectionné — paiement bientôt disponible.`);
+  };
+
+  if (!authChecked || !user) {
+    return (
+      <Layout>
+        <div className="container py-32 grid place-items-center">
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        </div>
+      </Layout>
+    );
+  }
+
+  const displayName = profile?.display_name || user.email?.split("@")[0] || "toi";
+
   return (
     <Layout>
       <div className="container py-10 md:py-14">
         <div className="flex flex-wrap justify-between items-end gap-4 mb-8">
           <div>
             <div className="text-sm uppercase tracking-widest text-muted-foreground">Dashboard</div>
-            <h1 className="mt-2 font-display text-4xl md:text-5xl">Tes stats Pixel.</h1>
+            <h1 className="mt-2 font-display text-4xl md:text-5xl">Salut {displayName}.</h1>
           </div>
-          <Button asChild className="rounded-full bg-foreground text-background hover:bg-foreground/90">
-            <Link to="/studio">Nouvelle photo</Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" className="rounded-full" onClick={handleSignOut}>Se déconnecter</Button>
+            <Button asChild className="rounded-full bg-foreground text-background hover:bg-foreground/90">
+              <Link to="/studio">Nouvelle photo</Link>
+            </Button>
+          </div>
         </div>
 
-        {/* Stat cards */}
+        {/* Stat cards — réelles uniquement */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <Card icon={Camera} label="Photos générées" value={stats.total.toString()} hint={`+${stats.lastWeek} cette semaine`} />
-          <Card icon={Heart} label="Sol favori" value={stats.favSol.name} hint={stats.favSol.tagline} image={stats.favSol.image} />
-          <Card icon={Clock} label="Temps économisé" value={`${stats.minutesSaved} min`} hint="vs studio photo manuel" />
-          <Card icon={Zap} label="Vitesse moyenne" value="8s" hint="par photo" highlight />
+          <StatCard icon={Camera} label="Photos générées" value={stats.total.toString()} hint={stats.lastWeek > 0 ? `+${stats.lastWeek} cette semaine` : "Aucune cette semaine"} />
+          {stats.favSol ? (
+            <StatCard icon={Heart} label="Sol favori" value={stats.favSol.name} hint={stats.favSol.tagline} image={stats.favSol.image} />
+          ) : (
+            <StatCard icon={Heart} label="Sol favori" value="—" hint="Génère une photo pour voir" />
+          )}
+          <StatCard icon={Clock} label="Temps économisé" value={stats.total > 0 ? `${stats.minutesSaved} min` : "—"} hint="vs studio photo manuel" />
+          <StatCard icon={Zap} label="Vitesse moyenne" value={stats.total > 0 ? "8s" : "—"} hint="par photo" highlight={stats.total > 0} />
         </div>
 
         {/* Chart */}
@@ -69,18 +195,24 @@ const Dashboard = () => {
             <div className="text-sm text-muted-foreground">Total : <span className="text-foreground font-medium">{stats.total}</span></div>
           </div>
           <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthly} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <CartesianGrid stroke="hsl(var(--border))" vertical={false} strokeDasharray="3 3" />
-                <XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
-                <Tooltip
-                  cursor={{ fill: "hsl(var(--secondary))" }}
-                  contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: 12 }}
-                />
-                <Bar dataKey="count" fill="hsl(var(--accent))" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {stats.total === 0 ? (
+              <div className="h-full grid place-items-center text-muted-foreground text-sm">
+                Aucune donnée pour l'instant. <Link to="/studio" className="ml-1 underline text-foreground">Génère ta première photo</Link>.
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={monthly} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <CartesianGrid stroke="hsl(var(--border))" vertical={false} strokeDasharray="3 3" />
+                  <XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
+                  <Tooltip
+                    cursor={{ fill: "hsl(var(--secondary))" }}
+                    contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: 12 }}
+                  />
+                  <Bar dataKey="count" fill="hsl(var(--accent))" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
@@ -109,12 +241,77 @@ const Dashboard = () => {
             </ul>
           )}
         </div>
+
+        {/* Abonnements */}
+        <section id="abonnements" className="mt-16 md:mt-24">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary text-xs uppercase tracking-widest">
+              <Sparkles className="w-3 h-3" /> Abonnements
+            </div>
+            <h2 className="mt-4 font-display text-4xl md:text-5xl">Choisis ton plan.</h2>
+            <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
+              Du test gratuit aux photos illimitées, un plan pour chaque besoin.
+            </p>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-5">
+            {PLANS.map((plan) => (
+              <div
+                key={plan.id}
+                className={`relative rounded-3xl border p-6 flex flex-col ${
+                  plan.popular
+                    ? "border-foreground shadow-elegant scale-[1.02] bg-card"
+                    : plan.highlight
+                    ? "bg-foreground text-background border-foreground"
+                    : "bg-card border-border"
+                }`}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-foreground text-background text-xs font-medium">
+                    Le plus populaire
+                  </div>
+                )}
+                <div className={`text-xs uppercase tracking-widest ${plan.highlight ? "text-background/70" : "text-muted-foreground"}`}>
+                  {plan.tagline}
+                </div>
+                <div className="font-display text-2xl mt-1">{plan.name}</div>
+                <div className="mt-4 flex items-baseline gap-1">
+                  <span className="font-display text-4xl">{plan.price}</span>
+                  <span className={`text-sm ${plan.highlight ? "text-background/70" : "text-muted-foreground"}`}>{plan.period}</span>
+                </div>
+                <div className={`mt-2 text-sm font-medium ${plan.highlight ? "text-background" : "text-foreground"}`}>
+                  {plan.quota}
+                </div>
+                <ul className="mt-5 space-y-2 flex-1">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-sm">
+                      <Check className={`w-4 h-4 mt-0.5 shrink-0 ${plan.highlight ? "text-background" : "text-foreground"}`} />
+                      <span className={plan.highlight ? "text-background/90" : "text-muted-foreground"}>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  onClick={() => handleSelectPlan(plan)}
+                  className={`mt-6 rounded-full w-full ${
+                    plan.highlight
+                      ? "bg-background text-foreground hover:bg-background/90"
+                      : plan.popular
+                      ? "bg-foreground text-background hover:bg-foreground/90"
+                      : "bg-secondary text-foreground hover:bg-secondary/80"
+                  }`}
+                >
+                  {plan.cta}
+                </Button>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
     </Layout>
   );
 };
 
-const Card = ({ icon: Icon, label, value, hint, image, highlight }: {
+const StatCard = ({ icon: Icon, label, value, hint, image, highlight }: {
   icon: any; label: string; value: string; hint?: string; image?: string; highlight?: boolean;
 }) => (
   <div className={`relative overflow-hidden rounded-2xl border p-5 ${highlight ? "bg-foreground text-background border-foreground" : "bg-card border-border"}`}>
