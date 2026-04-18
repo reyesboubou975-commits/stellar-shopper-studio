@@ -7,6 +7,19 @@ import concrete from "@/assets/floor-concrete.jpg";
 import walnut from "@/assets/floor-walnut.jpg";
 import plaster from "@/assets/floor-plaster.jpg";
 
+import oakBefore from "@/assets/ba/oak-before.jpg";
+import oakAfter from "@/assets/ba/oak-after.jpg";
+import marbleBefore from "@/assets/ba/marble-before.jpg";
+import marbleAfter from "@/assets/ba/marble-after.jpg";
+import linenBefore from "@/assets/ba/linen-before.jpg";
+import linenAfter from "@/assets/ba/linen-after.jpg";
+import concreteBefore from "@/assets/ba/concrete-before.jpg";
+import concreteAfter from "@/assets/ba/concrete-after.jpg";
+import walnutBefore from "@/assets/ba/walnut-before.jpg";
+import walnutAfter from "@/assets/ba/walnut-after.jpg";
+import plasterBefore from "@/assets/ba/plaster-before.jpg";
+import plasterAfter from "@/assets/ba/plaster-after.jpg";
+
 export type SolId = "oak" | "marble" | "linen" | "concrete" | "walnut" | "plaster";
 
 export interface Sol {
@@ -18,6 +31,7 @@ export interface Sol {
   bestFor: string[];
   image: string;
   prompt: string;
+  example: { before: string; after: string; product: string };
 }
 
 export const SOLS: Sol[] = [
