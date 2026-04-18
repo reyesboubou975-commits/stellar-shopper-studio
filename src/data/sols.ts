@@ -44,6 +44,7 @@ export const SOLS: Sol[] = [
     bestFor: ["Vêtements", "Sneakers", "Accessoires"],
     image: oak,
     prompt: "natural light oak parquet wood floor with soft warm window daylight from the left, very subtle realistic shadows",
+    example: { before: oakBefore, after: oakAfter, product: "Veste en jean vintage" },
   },
   {
     id: "marble",
@@ -54,6 +55,7 @@ export const SOLS: Sol[] = [
     bestFor: ["Bijoux", "Sacs de luxe", "Cosmétiques"],
     image: marble,
     prompt: "polished white Calacatta marble surface with subtle gray veining and soft daylight, premium look",
+    example: { before: marbleBefore, after: marbleAfter, product: "Collier en or" },
   },
   {
     id: "linen",
@@ -64,6 +66,7 @@ export const SOLS: Sol[] = [
     bestFor: ["Robes", "Lingerie", "Accessoires délicats"],
     image: linen,
     prompt: "warm beige natural linen fabric backdrop with soft folds and gentle directional daylight",
+    example: { before: linenBefore, after: linenAfter, product: "Robe satin beige" },
   },
   {
     id: "concrete",
@@ -74,6 +77,7 @@ export const SOLS: Sol[] = [
     bestFor: ["Sneakers", "Streetwear", "Tech"],
     image: concrete,
     prompt: "smooth polished gray concrete floor with even soft daylight, contemporary minimalist surface",
+    example: { before: concreteBefore, after: concreteAfter, product: "Nike Air Force 1" },
   },
   {
     id: "walnut",
@@ -84,6 +88,7 @@ export const SOLS: Sol[] = [
     bestFor: ["Maroquinerie", "Pièces claires", "Vintage"],
     image: walnut,
     prompt: "rich dark walnut wood floor with visible grain and warm moody directional lighting",
+    example: { before: walnutBefore, after: walnutAfter, product: "Sac en cuir" },
   },
   {
     id: "plaster",
@@ -94,6 +99,7 @@ export const SOLS: Sol[] = [
     bestFor: ["Tout type d'article", "E-commerce", "Lookbook"],
     image: plaster,
     prompt: "smooth cream off-white seamless paper photography backdrop with soft even diffused lighting",
+    example: { before: plasterBefore, after: plasterAfter, product: "Pull en maille rose" },
   },
 ];
 
