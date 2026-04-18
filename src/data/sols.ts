@@ -7,6 +7,19 @@ import concrete from "@/assets/floor-concrete.jpg";
 import walnut from "@/assets/floor-walnut.jpg";
 import plaster from "@/assets/floor-plaster.jpg";
 
+import oakBefore from "@/assets/ba/oak-before.jpg";
+import oakAfter from "@/assets/ba/oak-after.jpg";
+import marbleBefore from "@/assets/ba/marble-before.jpg";
+import marbleAfter from "@/assets/ba/marble-after.jpg";
+import linenBefore from "@/assets/ba/linen-before.jpg";
+import linenAfter from "@/assets/ba/linen-after.jpg";
+import concreteBefore from "@/assets/ba/concrete-before.jpg";
+import concreteAfter from "@/assets/ba/concrete-after.jpg";
+import walnutBefore from "@/assets/ba/walnut-before.jpg";
+import walnutAfter from "@/assets/ba/walnut-after.jpg";
+import plasterBefore from "@/assets/ba/plaster-before.jpg";
+import plasterAfter from "@/assets/ba/plaster-after.jpg";
+
 export type SolId = "oak" | "marble" | "linen" | "concrete" | "walnut" | "plaster";
 
 export interface Sol {
@@ -18,6 +31,7 @@ export interface Sol {
   bestFor: string[];
   image: string;
   prompt: string;
+  example: { before: string; after: string; product: string };
 }
 
 export const SOLS: Sol[] = [
@@ -30,6 +44,7 @@ export const SOLS: Sol[] = [
     bestFor: ["Vêtements", "Sneakers", "Accessoires"],
     image: oak,
     prompt: "natural light oak parquet wood floor with soft warm window daylight from the left, very subtle realistic shadows",
+    example: { before: oakBefore, after: oakAfter, product: "Veste en jean vintage" },
   },
   {
     id: "marble",
@@ -40,6 +55,7 @@ export const SOLS: Sol[] = [
     bestFor: ["Bijoux", "Sacs de luxe", "Cosmétiques"],
     image: marble,
     prompt: "polished white Calacatta marble surface with subtle gray veining and soft daylight, premium look",
+    example: { before: marbleBefore, after: marbleAfter, product: "Collier en or" },
   },
   {
     id: "linen",
@@ -50,6 +66,7 @@ export const SOLS: Sol[] = [
     bestFor: ["Robes", "Lingerie", "Accessoires délicats"],
     image: linen,
     prompt: "warm beige natural linen fabric backdrop with soft folds and gentle directional daylight",
+    example: { before: linenBefore, after: linenAfter, product: "Robe satin beige" },
   },
   {
     id: "concrete",
@@ -60,6 +77,7 @@ export const SOLS: Sol[] = [
     bestFor: ["Sneakers", "Streetwear", "Tech"],
     image: concrete,
     prompt: "smooth polished gray concrete floor with even soft daylight, contemporary minimalist surface",
+    example: { before: concreteBefore, after: concreteAfter, product: "Nike Air Force 1" },
   },
   {
     id: "walnut",
@@ -70,6 +88,7 @@ export const SOLS: Sol[] = [
     bestFor: ["Maroquinerie", "Pièces claires", "Vintage"],
     image: walnut,
     prompt: "rich dark walnut wood floor with visible grain and warm moody directional lighting",
+    example: { before: walnutBefore, after: walnutAfter, product: "Sac en cuir" },
   },
   {
     id: "plaster",
@@ -80,6 +99,7 @@ export const SOLS: Sol[] = [
     bestFor: ["Tout type d'article", "E-commerce", "Lookbook"],
     image: plaster,
     prompt: "smooth cream off-white seamless paper photography backdrop with soft even diffused lighting",
+    example: { before: plasterBefore, after: plasterAfter, product: "Pull en maille rose" },
   },
 ];
 

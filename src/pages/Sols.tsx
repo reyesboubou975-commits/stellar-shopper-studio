@@ -4,8 +4,6 @@ import { BeforeAfter } from "@/components/BeforeAfter";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, Check } from "lucide-react";
-import before from "@/assets/before-sneaker.jpg";
-import after from "@/assets/after-sneaker.jpg";
 
 const Sols = () => {
   return (
@@ -32,7 +30,7 @@ const Sols = () => {
                 <img src={sol.image} alt={sol.name} className="w-full h-full object-cover" loading="lazy" />
               </div>
               <div className="mt-4 grid grid-cols-2 gap-4">
-                <BeforeAfter before={before} after={after} alt={`${sol.name} avant/après`} />
+                <BeforeAfter before={sol.example.before} after={sol.example.after} alt={`${sol.name} — ${sol.example.product}`} />
                 <div className="space-y-3">
                   <div className="p-4 rounded-xl bg-secondary text-sm">
                     <div className="text-muted-foreground text-xs">Idéal pour</div>
