@@ -9,6 +9,7 @@ import Studio from "./pages/Studio.tsx";
 import Sols from "./pages/Sols.tsx";
 import Guide from "./pages/Guide.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
+import Auth from "./pages/Auth.tsx";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/sols" element={<Sols />} />
           <Route path="/guide" element={<Guide />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
