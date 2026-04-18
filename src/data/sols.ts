@@ -77,7 +77,7 @@ export const SOLS: Sol[] = [
     bestFor: ["Sneakers", "Streetwear", "Tech"],
     image: concrete,
     prompt: "smooth polished gray concrete floor with even soft daylight, contemporary minimalist surface",
-    example: { before: concreteBefore, after: concreteAfter, product: "Nike Air Force 1" },
+    example: { before: concreteBefore, after: concreteAfter, product: "Hoodie Nike gris" },
   },
   {
     id: "walnut",
