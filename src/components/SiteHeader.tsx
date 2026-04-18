@@ -52,10 +52,10 @@ export const SiteHeader = () => {
 
         <div className="hidden md:flex items-center gap-2">
           <Button asChild variant="ghost" size="sm">
-            <Link to="/studio">Se connecter</Link>
+            <Link to="/auth">Se connecter</Link>
           </Button>
           <Button asChild size="sm" className="rounded-full bg-foreground text-background hover:bg-foreground/90">
-            <Link to="/studio">Essayer gratuitement</Link>
+            <Link to="/auth">Essayer gratuitement</Link>
           </Button>
         </div>
 
