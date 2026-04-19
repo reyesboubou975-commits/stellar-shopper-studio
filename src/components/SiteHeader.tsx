@@ -103,9 +103,15 @@ export const SiteHeader = () => {
                 isActive ? "bg-secondary" : "hover:bg-secondary/50"
               )}>{n.label}</NavLink>
             ))}
-            <Button asChild className="mt-2 rounded-full bg-foreground text-background">
-              <Link to="/studio">Essayer gratuitement</Link>
-            </Button>
+            {user ? (
+              <Button onClick={handleSignOut} className="mt-2 rounded-full" variant="outline">
+                <LogOut className="w-4 h-4 mr-1" /> Déconnexion
+              </Button>
+            ) : (
+              <Button asChild className="mt-2 rounded-full bg-foreground text-background">
+                <Link to="/auth">Essayer gratuitement</Link>
+              </Button>
+            )}
           </div>
         </div>
       )}
