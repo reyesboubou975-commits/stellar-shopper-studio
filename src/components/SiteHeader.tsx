@@ -68,12 +68,25 @@ export const SiteHeader = () => {
         </nav>
 
         <div className="hidden md:flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/auth">Se connecter</Link>
-          </Button>
-          <Button asChild size="sm" className="rounded-full bg-foreground text-background hover:bg-foreground/90">
-            <Link to="/auth">Essayer gratuitement</Link>
-          </Button>
+          {user ? (
+            <>
+              <Button asChild variant="ghost" size="sm">
+                <Link to="/dashboard">Mon espace</Link>
+              </Button>
+              <Button onClick={handleSignOut} size="sm" variant="outline" className="rounded-full">
+                <LogOut className="w-4 h-4 mr-1" /> Déconnexion
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button asChild variant="ghost" size="sm">
+                <Link to="/auth">Se connecter</Link>
+              </Button>
+              <Button asChild size="sm" className="rounded-full bg-foreground text-background hover:bg-foreground/90">
+                <Link to="/auth">Essayer gratuitement</Link>
+              </Button>
+            </>
+          )}
         </div>
 
         <button className="md:hidden p-2" onClick={() => setOpen(!open)} aria-label="Menu">
