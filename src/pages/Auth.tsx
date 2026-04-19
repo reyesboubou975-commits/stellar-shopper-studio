@@ -42,7 +42,8 @@ const Auth = () => {
     if (error) {
       toast.error(error.message.includes("already") ? "Cet email est déjà utilisé" : error.message);
     } else {
-      toast.success("Compte créé ! Redirection…");
+      toast.success("Compte créé ! Vérifie ton email.");
+      navigate("/verify-email", { state: { email } });
     }
   };
 
