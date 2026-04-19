@@ -10,6 +10,7 @@ import Sols from "./pages/Sols.tsx";
 import Guide from "./pages/Guide.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import Auth from "./pages/Auth.tsx";
+import VerifyEmail from "./pages/VerifyEmail.tsx";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/guide" element={<Guide />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
