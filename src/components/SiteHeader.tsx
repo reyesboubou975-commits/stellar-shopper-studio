@@ -1,8 +1,10 @@
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Menu, X, Sparkles } from "lucide-react";
+import { Menu, X, Sparkles, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
 const NAV = [
   { to: "/sols", label: "Sols" },
@@ -14,7 +16,9 @@ const NAV = [
 export const SiteHeader = () => {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const { pathname } = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => { setOpen(false); }, [pathname]);
   useEffect(() => {
@@ -23,6 +27,19 @@ export const SiteHeader = () => {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUser(session?.user ?? null);
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user ?? null));
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
+  };
 
   return (
     <header className={cn(
@@ -51,12 +68,25 @@ export const SiteHeader = () => {
         </nav>
 
         <div className="hidden md:flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/auth">Se connecter</Link>
-          </Button>
-          <Button asChild size="sm" className="rounded-full bg-foreground text-background hover:bg-foreground/90">
-            <Link to="/auth">Essayer gratuitement</Link>
-          </Button>
+          {user ? (
+            <>
+              <Button asChild variant="ghost" size="sm">
+                <Link to="/dashboard">Mon espace</Link>
+              </Button>
+              <Button onClick={handleSignOut} size="sm" variant="outline" className="rounded-full">
+                <LogOut className="w-4 h-4 mr-1" /> Déconnexion
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button asChild variant="ghost" size="sm">
+                <Link to="/auth">Se connecter</Link>
+              </Button>
+              <Button asChild size="sm" className="rounded-full bg-foreground text-background hover:bg-foreground/90">
+                <Link to="/auth">Essayer gratuitement</Link>
+              </Button>
+            </>
+          )}
         </div>
 
         <button className="md:hidden p-2" onClick={() => setOpen(!open)} aria-label="Menu">
@@ -73,9 +103,15 @@ export const SiteHeader = () => {
                 isActive ? "bg-secondary" : "hover:bg-secondary/50"
               )}>{n.label}</NavLink>
             ))}
-            <Button asChild className="mt-2 rounded-full bg-foreground text-background">
-              <Link to="/studio">Essayer gratuitement</Link>
-            </Button>
+            {user ? (
+              <Button onClick={handleSignOut} className="mt-2 rounded-full" variant="outline">
+                <LogOut className="w-4 h-4 mr-1" /> Déconnexion
+              </Button>
+            ) : (
+              <Button asChild className="mt-2 rounded-full bg-foreground text-background">
+                <Link to="/auth">Essayer gratuitement</Link>
+              </Button>
+            )}
           </div>
         </div>
       )}
