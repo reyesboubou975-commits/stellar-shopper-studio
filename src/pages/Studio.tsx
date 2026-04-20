@@ -1,12 +1,14 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { SOLS, LIGHTS, FORMATS, type SolId, type LightId, type FormatId } from "@/data/sols";
-import { Upload, X, Loader2, Download, Wand2, Image as ImageIcon, Check, AlertCircle } from "lucide-react";
+import { Upload, X, Loader2, Download, Wand2, Image as ImageIcon, Check, AlertCircle, Lock, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { pushHistory } from "@/lib/history";
 import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 interface PhotoItem {
   id: string;
@@ -31,7 +33,18 @@ const Studio = () => {
   const [format, setFormat] = useState<FormatId>("square");
   const [hint, setHint] = useState("");
   const [running, setRunning] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(false);
+  const [authPromptOpen, setAuthPromptOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setIsAuthed(!!session);
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => setIsAuthed(!!session));
+    return () => subscription.unsubscribe();
+  }, []);
 
   const onFiles = useCallback(async (files: FileList | null) => {
     if (!files) return;
