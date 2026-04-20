@@ -107,6 +107,7 @@ const Studio = () => {
 
   const downloadOne = (item: PhotoItem) => {
     if (!item.result) return;
+    if (!isAuthed) { setAuthPromptOpen(true); return; }
     const a = document.createElement("a");
     a.href = item.result;
     a.download = `pixel-${sol}-${item.name.replace(/\.[^.]+$/, "")}.png`;
@@ -116,6 +117,7 @@ const Studio = () => {
   const downloadAll = () => {
     const done = photos.filter(p => p.result);
     if (!done.length) { toast.info("Rien à télécharger pour l'instant."); return; }
+    if (!isAuthed) { setAuthPromptOpen(true); return; }
     done.forEach((p, i) => setTimeout(() => downloadOne(p), i * 250));
   };
 
