@@ -281,6 +281,28 @@ const Studio = () => {
           </section>
         </div>
       </div>
+
+      <Dialog open={authPromptOpen} onOpenChange={setAuthPromptOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="w-12 h-12 rounded-2xl bg-warm shadow-glow grid place-items-center mb-3">
+              <Lock className="w-5 h-5 text-white" />
+            </div>
+            <DialogTitle className="font-display text-2xl">Crée ton compte pour télécharger</DialogTitle>
+            <DialogDescription className="text-base">
+              Tu peux tester Pixel autant que tu veux. Pour récupérer tes photos en haute qualité, il te faut un compte gratuit.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setAuthPromptOpen(false)} className="rounded-full">
+              Continuer à tester
+            </Button>
+            <Button onClick={() => navigate("/auth")} className="rounded-full bg-foreground text-background hover:bg-foreground/90">
+              <Sparkles className="w-4 h-4 mr-1" /> Créer mon compte
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };
