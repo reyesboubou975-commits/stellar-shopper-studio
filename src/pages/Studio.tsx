@@ -1,12 +1,14 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { SOLS, LIGHTS, FORMATS, type SolId, type LightId, type FormatId } from "@/data/sols";
-import { Upload, X, Loader2, Download, Wand2, Image as ImageIcon, Check, AlertCircle } from "lucide-react";
+import { Upload, X, Loader2, Download, Wand2, Image as ImageIcon, Check, AlertCircle, Lock, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { pushHistory } from "@/lib/history";
 import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 interface PhotoItem {
   id: string;
@@ -31,7 +33,18 @@ const Studio = () => {
   const [format, setFormat] = useState<FormatId>("square");
   const [hint, setHint] = useState("");
   const [running, setRunning] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(false);
+  const [authPromptOpen, setAuthPromptOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setIsAuthed(!!session);
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => setIsAuthed(!!session));
+    return () => subscription.unsubscribe();
+  }, []);
 
   const onFiles = useCallback(async (files: FileList | null) => {
     if (!files) return;
@@ -94,6 +107,7 @@ const Studio = () => {
 
   const downloadOne = (item: PhotoItem) => {
     if (!item.result) return;
+    if (!isAuthed) { setAuthPromptOpen(true); return; }
     const a = document.createElement("a");
     a.href = item.result;
     a.download = `pixel-${sol}-${item.name.replace(/\.[^.]+$/, "")}.png`;
@@ -103,6 +117,7 @@ const Studio = () => {
   const downloadAll = () => {
     const done = photos.filter(p => p.result);
     if (!done.length) { toast.info("Rien à télécharger pour l'instant."); return; }
+    if (!isAuthed) { setAuthPromptOpen(true); return; }
     done.forEach((p, i) => setTimeout(() => downloadOne(p), i * 250));
   };
 
@@ -266,6 +281,28 @@ const Studio = () => {
           </section>
         </div>
       </div>
+
+      <Dialog open={authPromptOpen} onOpenChange={setAuthPromptOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="w-12 h-12 rounded-2xl bg-warm shadow-glow grid place-items-center mb-3">
+              <Lock className="w-5 h-5 text-white" />
+            </div>
+            <DialogTitle className="font-display text-2xl">Crée ton compte pour télécharger</DialogTitle>
+            <DialogDescription className="text-base">
+              Tu peux tester Pixel autant que tu veux. Pour récupérer tes photos en haute qualité, il te faut un compte gratuit.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setAuthPromptOpen(false)} className="rounded-full">
+              Continuer à tester
+            </Button>
+            <Button onClick={() => navigate("/auth")} className="rounded-full bg-foreground text-background hover:bg-foreground/90">
+              <Sparkles className="w-4 h-4 mr-1" /> Créer mon compte
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };
