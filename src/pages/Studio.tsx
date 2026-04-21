@@ -177,7 +177,7 @@ const Studio = () => {
                 <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary text-sm">
                   <Sparkles className="w-3.5 h-3.5" />
                   <span className="font-medium">{credits}</span>
-                  <span className="text-muted-foreground">crédit{credits > 1 ? "s" : ""} restant{credits > 1 ? "s" : ""}</span>
+                  <span className="text-muted-foreground">crédit{credits > 1 ? "s" : ""} restant{credits > 1 ? "s" : ""} · 5 crédits / photo</span>
                 </div>
               )
             ) : (
