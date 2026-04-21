@@ -83,7 +83,7 @@ export const SiteHeader = () => {
                 <Link to="/auth">Se connecter</Link>
               </Button>
               <Button asChild size="sm" className="rounded-full bg-foreground text-background hover:bg-foreground/90">
-                <Link to="/auth">Essayer gratuitement</Link>
+                <Link to="/studio">Essayer gratuitement</Link>
               </Button>
             </>
           )}
@@ -109,7 +109,7 @@ export const SiteHeader = () => {
               </Button>
             ) : (
               <Button asChild className="mt-2 rounded-full bg-foreground text-background">
-                <Link to="/auth">Essayer gratuitement</Link>
+                <Link to="/studio">Essayer gratuitement</Link>
               </Button>
             )}
           </div>
