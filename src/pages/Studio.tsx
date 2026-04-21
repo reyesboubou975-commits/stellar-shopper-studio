@@ -66,6 +66,7 @@ const Studio = () => {
   const removePhoto = (id: string) => setPhotos(p => p.filter(x => x.id !== id));
 
   const generateOne = async (item: PhotoItem) => {
+    if (!isAuthed) { setAuthPromptOpen(true); return; }
     const solDef = SOLS.find(s => s.id === sol)!;
     const lightDef = LIGHTS.find(l => l.id === light)!;
     setPhotos(p => p.map(x => x.id === item.id ? { ...x, status: "loading", error: undefined } : x));
@@ -73,8 +74,8 @@ const Studio = () => {
       const { data, error } = await supabase.functions.invoke("generate-photo", {
         body: {
           imageBase64: item.src,
-          solPrompt: solDef.prompt,
-          lightPrompt: lightDef.description,
+          solId: solDef.id,
+          lightId: lightDef.id,
           articleHint: hint || undefined,
         },
       });
@@ -93,6 +94,7 @@ const Studio = () => {
 
   const generateAll = async () => {
     if (running) return;
+    if (!isAuthed) { setAuthPromptOpen(true); return; }
     const queue = photos.filter(p => p.status !== "done");
     if (!queue.length) { toast.info("Toutes tes photos sont déjà générées."); return; }
     setRunning(true);
