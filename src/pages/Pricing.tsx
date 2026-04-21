@@ -1,18 +1,20 @@
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Check, Sparkles, Zap, Crown } from "lucide-react";
+import { Check, Sparkles, Zap, Crown, Infinity as InfinityIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// Tarification : 1 photo générée = 5 crédits
 const PLANS = [
   {
     id: "starter",
     name: "Starter",
     price: "9€",
     period: "/mois",
-    credits: 100,
+    credits: "100",
+    photos: "≈ 20 photos / mois",
     icon: Sparkles,
-    features: ["100 photos par mois", "Tous les sols & lumières", "Export HD", "Support email"],
+    features: ["100 crédits / mois", "Tous les sols & lumières", "Export HD", "Support email"],
     cta: "Commencer",
     popular: false,
   },
@@ -21,9 +23,10 @@ const PLANS = [
     name: "Pro",
     price: "29€",
     period: "/mois",
-    credits: 500,
+    credits: "500",
+    photos: "≈ 100 photos / mois",
     icon: Zap,
-    features: ["500 photos par mois", "Génération en batch", "Export HD + 4K", "Support prioritaire", "Historique illimité"],
+    features: ["500 crédits / mois", "Génération en batch", "Export HD + 4K", "Support prioritaire", "Historique illimité"],
     cta: "Passer au Pro",
     popular: true,
   },
@@ -32,10 +35,23 @@ const PLANS = [
     name: "Studio",
     price: "99€",
     period: "/mois",
-    credits: 2500,
+    credits: "2 500",
+    photos: "≈ 500 photos / mois",
     icon: Crown,
-    features: ["2 500 photos par mois", "API access", "Sols personnalisés", "Manager dédié", "Facturation entreprise"],
+    features: ["2 500 crédits / mois", "API access", "Sols personnalisés", "Manager dédié", "Facturation entreprise"],
     cta: "Contacter",
+    popular: false,
+  },
+  {
+    id: "lifetime",
+    name: "Lifetime",
+    price: "119,99€",
+    period: "/mois",
+    credits: "∞",
+    photos: "Photos illimitées",
+    icon: InfinityIcon,
+    features: ["Crédits illimités", "Toutes les fonctionnalités Studio", "Accès anticipé aux nouveautés", "Support VIP 24/7", "API illimitée"],
+    cta: "Devenir Lifetime",
     popular: false,
   },
 ];
@@ -52,7 +68,7 @@ const Pricing = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
           {PLANS.map((p) => {
             const Icon = p.icon;
             return (
@@ -76,7 +92,7 @@ const Pricing = () => {
                   <span className="font-display text-4xl">{p.price}</span>
                   <span className="text-muted-foreground text-sm">{p.period}</span>
                 </div>
-                <div className="mt-1 text-sm text-muted-foreground">{p.credits} crédits / mois</div>
+                <div className="mt-1 text-sm text-muted-foreground">{p.photos}</div>
                 <ul className="mt-6 space-y-2.5 flex-1">
                   {p.features.map((f) => (
                     <li key={f} className="flex items-start gap-2 text-sm">
@@ -101,7 +117,7 @@ const Pricing = () => {
         </div>
 
         <p className="text-center text-xs text-muted-foreground mt-10">
-          Paiements bientôt disponibles. Pour l'instant, profite de tes 10 crédits gratuits à l'inscription.
+          1 photo générée = 5 crédits. 10 crédits offerts à l'inscription (≈ 2 photos test). Paiements bientôt disponibles.
         </p>
       </div>
     </Layout>
