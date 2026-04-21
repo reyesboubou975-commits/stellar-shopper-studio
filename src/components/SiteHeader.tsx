@@ -10,6 +10,7 @@ const NAV = [
   { to: "/sols", label: "Sols" },
   { to: "/studio", label: "Studio" },
   { to: "/guide", label: "Guide" },
+  { to: "/pricing", label: "Tarifs" },
   { to: "/dashboard", label: "Dashboard" },
 ];
 
