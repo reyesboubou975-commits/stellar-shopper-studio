@@ -50,6 +50,7 @@ export type Database = {
           credits: number
           id: string
           total_generated: number
+          unlimited: boolean
           updated_at: string
           user_id: string
         }
@@ -58,6 +59,7 @@ export type Database = {
           credits?: number
           id?: string
           total_generated?: number
+          unlimited?: boolean
           updated_at?: string
           user_id: string
         }
@@ -66,6 +68,7 @@ export type Database = {
           credits?: number
           id?: string
           total_generated?: number
+          unlimited?: boolean
           updated_at?: string
           user_id?: string
         }
@@ -76,7 +79,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      consume_credit: { Args: { _user_id: string }; Returns: boolean }
+      consume_credit:
+        | { Args: { _user_id: string }; Returns: boolean }
+        | { Args: { _amount?: number; _user_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
