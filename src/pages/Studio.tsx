@@ -344,17 +344,39 @@ const Studio = () => {
             <div className="w-12 h-12 rounded-2xl bg-warm shadow-glow grid place-items-center mb-3">
               <Lock className="w-5 h-5 text-white" />
             </div>
-            <DialogTitle className="font-display text-2xl">Crée ton compte pour télécharger</DialogTitle>
+            <DialogTitle className="font-display text-2xl">Crée ton compte pour continuer</DialogTitle>
             <DialogDescription className="text-base">
-              Tu peux tester Pixel autant que tu veux. Pour récupérer tes photos en haute qualité, il te faut un compte gratuit.
+              Tu as utilisé ton essai gratuit. Inscris-toi en 30 secondes pour recevoir <strong>10 crédits offerts</strong> et télécharger tes photos en HD. Déjà un compte ? Connecte-toi.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex-col sm:flex-row gap-2">
-            <Button variant="outline" onClick={() => setAuthPromptOpen(false)} className="rounded-full">
-              Continuer à tester
+            <Button variant="outline" onClick={() => navigate("/auth?mode=signin")} className="rounded-full">
+              Se connecter
             </Button>
             <Button onClick={() => navigate("/auth")} className="rounded-full bg-foreground text-background hover:bg-foreground/90">
               <Sparkles className="w-4 h-4 mr-1" /> Créer mon compte
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={noCreditsOpen} onOpenChange={setNoCreditsOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="w-12 h-12 rounded-2xl bg-warm shadow-glow grid place-items-center mb-3">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <DialogTitle className="font-display text-2xl">Tes crédits sont épuisés</DialogTitle>
+            <DialogDescription className="text-base">
+              Tu as utilisé tes 10 crédits gratuits. Choisis un plan pour continuer à générer des photos studio illimitées.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setNoCreditsOpen(false)} className="rounded-full">
+              Plus tard
+            </Button>
+            <Button onClick={() => navigate("/pricing")} className="rounded-full bg-foreground text-background hover:bg-foreground/90">
+              Voir les plans
             </Button>
           </DialogFooter>
         </DialogContent>
