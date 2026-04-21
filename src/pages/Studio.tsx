@@ -35,16 +35,35 @@ const Studio = () => {
   const [running, setRunning] = useState(false);
   const [isAuthed, setIsAuthed] = useState(false);
   const [authPromptOpen, setAuthPromptOpen] = useState(false);
+  const [noCreditsOpen, setNoCreditsOpen] = useState(false);
+  const [credits, setCredits] = useState<number | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+
+  const GUEST_KEY = "pixel_guest_generations";
+  const getGuestUsed = () => parseInt(localStorage.getItem(GUEST_KEY) || "0", 10);
+  const incGuestUsed = () => localStorage.setItem(GUEST_KEY, String(getGuestUsed() + 1));
+
+  const fetchCredits = useCallback(async (uid: string) => {
+    const { data } = await supabase.from("user_credits").select("credits").eq("user_id", uid).maybeSingle();
+    setCredits(data?.credits ?? 0);
+  }, []);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
       setIsAuthed(!!session);
+      setUserId(session?.user?.id ?? null);
+      if (session?.user?.id) fetchCredits(session.user.id);
+      else setCredits(null);
     });
-    supabase.auth.getSession().then(({ data: { session } }) => setIsAuthed(!!session));
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAuthed(!!session);
+      setUserId(session?.user?.id ?? null);
+      if (session?.user?.id) fetchCredits(session.user.id);
+    });
     return () => subscription.unsubscribe();
-  }, []);
+  }, [fetchCredits]);
 
   const onFiles = useCallback(async (files: FileList | null) => {
     if (!files) return;
@@ -66,7 +85,12 @@ const Studio = () => {
   const removePhoto = (id: string) => setPhotos(p => p.filter(x => x.id !== id));
 
   const generateOne = async (item: PhotoItem) => {
-    if (!isAuthed) { setAuthPromptOpen(true); return; }
+    // Guest: 1 free generation total. Then prompt signup.
+    if (!isAuthed) {
+      if (getGuestUsed() >= 1) { setAuthPromptOpen(true); return; }
+    } else {
+      if (credits !== null && credits <= 0) { setNoCreditsOpen(true); return; }
+    }
     const solDef = SOLS.find(s => s.id === sol)!;
     const lightDef = LIGHTS.find(l => l.id === light)!;
     setPhotos(p => p.map(x => x.id === item.id ? { ...x, status: "loading", error: undefined } : x));
@@ -79,12 +103,21 @@ const Studio = () => {
           articleHint: hint || undefined,
         },
       });
+      const payload = data as any;
+      if (payload?.code === "NO_CREDITS" || (error as any)?.context?.status === 402) {
+        setNoCreditsOpen(true);
+        setPhotos(p => p.map(x => x.id === item.id ? { ...x, status: "idle", error: undefined } : x));
+        if (userId) fetchCredits(userId);
+        return;
+      }
       if (error) throw new Error(error.message || "Erreur réseau");
-      if ((data as any)?.error) throw new Error((data as any).error);
+      if (payload?.error) throw new Error(payload.error);
       const image = (data as any)?.image as string;
       if (!image) throw new Error("Pas d'image renvoyée");
       setPhotos(p => p.map(x => x.id === item.id ? { ...x, status: "done", result: image } : x));
       pushHistory({ sol, light, format });
+      if (isAuthed && userId) fetchCredits(userId);
+      else incGuestUsed();
     } catch (e: any) {
       const msg = e?.message || "Erreur";
       setPhotos(p => p.map(x => x.id === item.id ? { ...x, status: "error", error: msg } : x));
@@ -94,7 +127,11 @@ const Studio = () => {
 
   const generateAll = async () => {
     if (running) return;
-    if (!isAuthed) { setAuthPromptOpen(true); return; }
+    if (!isAuthed) {
+      if (getGuestUsed() >= 1) { setAuthPromptOpen(true); return; }
+    } else if (credits !== null && credits <= 0) {
+      setNoCreditsOpen(true); return;
+    }
     const queue = photos.filter(p => p.status !== "done");
     if (!queue.length) { toast.info("Toutes tes photos sont déjà générées."); return; }
     setRunning(true);
@@ -102,6 +139,9 @@ const Studio = () => {
     for (const item of queue) {
       // eslint-disable-next-line no-await-in-loop
       await generateOne(item);
+      // Stop the batch if guest hit limit or credits ran out
+      if (!isAuthed && getGuestUsed() >= 1) break;
+      if (isAuthed && credits !== null && credits <= 0) break;
     }
     setRunning(false);
     toast.success("Batch terminé ✨");
