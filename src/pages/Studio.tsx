@@ -94,6 +94,7 @@ const Studio = () => {
 
   const generateAll = async () => {
     if (running) return;
+    if (!isAuthed) { setAuthPromptOpen(true); return; }
     const queue = photos.filter(p => p.status !== "done");
     if (!queue.length) { toast.info("Toutes tes photos sont déjà générées."); return; }
     setRunning(true);
