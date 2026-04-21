@@ -45,10 +45,12 @@ Deno.serve(async (req: Request) => {
       const token = authHeader.replace("Bearer ", "");
       // Ignore the anon JWT used by guests
       if (token && token !== anonKey) {
-        const sb = createClient(supabaseUrl, anonKey);
-        const { data: claimsData, error: claimsErr } = await sb.auth.getClaims(token);
-        if (!claimsErr && claimsData?.claims?.sub) {
-          userId = claimsData.claims.sub as string;
+        const sb = createClient(supabaseUrl, anonKey, {
+          global: { headers: { Authorization: `Bearer ${token}` } },
+        });
+        const { data: userData, error: userErr } = await sb.auth.getUser(token);
+        if (!userErr && userData?.user?.id) {
+          userId = userData.user.id;
         }
       }
     }
