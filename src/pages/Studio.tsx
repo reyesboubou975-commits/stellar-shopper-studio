@@ -73,8 +73,8 @@ const Studio = () => {
       const { data, error } = await supabase.functions.invoke("generate-photo", {
         body: {
           imageBase64: item.src,
-          solPrompt: solDef.prompt,
-          lightPrompt: lightDef.description,
+          solId: solDef.id,
+          lightId: lightDef.id,
           articleHint: hint || undefined,
         },
       });
