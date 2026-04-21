@@ -66,6 +66,7 @@ const Studio = () => {
   const removePhoto = (id: string) => setPhotos(p => p.filter(x => x.id !== id));
 
   const generateOne = async (item: PhotoItem) => {
+    if (!isAuthed) { setAuthPromptOpen(true); return; }
     const solDef = SOLS.find(s => s.id === sol)!;
     const lightDef = LIGHTS.find(l => l.id === light)!;
     setPhotos(p => p.map(x => x.id === item.id ? { ...x, status: "loading", error: undefined } : x));
