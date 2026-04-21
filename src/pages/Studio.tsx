@@ -172,6 +172,20 @@ const Studio = () => {
           <div>
             <div className="text-sm uppercase tracking-widest text-muted-foreground">Studio</div>
             <h1 className="mt-2 font-display text-4xl md:text-5xl">Compose ta photo parfaite.</h1>
+            {isAuthed ? (
+              credits !== null && (
+                <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary text-sm">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span className="font-medium">{credits}</span>
+                  <span className="text-muted-foreground">crédit{credits > 1 ? "s" : ""} restant{credits > 1 ? "s" : ""}</span>
+                </div>
+              )
+            ) : (
+              <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-warm/10 text-sm">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span className="text-muted-foreground">1 essai gratuit · puis inscris-toi pour 10 crédits offerts</span>
+              </div>
+            )}
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={downloadAll} disabled={!photos.some(p => p.result)} className="rounded-full">
