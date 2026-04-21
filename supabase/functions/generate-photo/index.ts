@@ -1,5 +1,5 @@
 // Edge function: generate a product photo using Lovable AI Gateway (Gemini image edit).
-// CORS open. Auth required. Receives { imageBase64, solId, lightId, articleHint }.
+// CORS open. Auth optional (guests get 1 free preview). Authed users consume 1 credit.
 // Returns { image: "data:image/png;base64,..." }.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
@@ -34,23 +34,40 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    // ---- Auth check ----
+    // ---- Auth (optional) ----
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Authentification requise." }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    let userId: string | null = null;
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.replace("Bearer ", "");
+      // Ignore the anon JWT used by guests
+      if (token && token !== anonKey) {
+        const sb = createClient(supabaseUrl, anonKey);
+        const { data: claimsData, error: claimsErr } = await sb.auth.getClaims(token);
+        if (!claimsErr && claimsData?.claims?.sub) {
+          userId = claimsData.claims.sub as string;
+        }
+      }
     }
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-    );
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsErr } = await supabase.auth.getClaims(token);
-    if (claimsErr || !claimsData?.claims?.sub) {
-      return new Response(JSON.stringify({ error: "Authentification requise." }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+
+    // Authed users: consume 1 credit atomically. If 0 → 402.
+    if (userId) {
+      const admin = createClient(supabaseUrl, serviceKey);
+      const { data: ok, error: rpcErr } = await admin.rpc("consume_credit", { _user_id: userId });
+      if (rpcErr) {
+        console.error("consume_credit error", rpcErr);
+        return new Response(JSON.stringify({ error: "Erreur crédits." }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (!ok) {
+        return new Response(JSON.stringify({ error: "Crédits épuisés", code: "NO_CREDITS" }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -132,7 +149,7 @@ Output a photorealistic, high-resolution shot, top-down or slight 3/4 angle, wit
         });
       }
       if (res.status === 402) {
-        return new Response(JSON.stringify({ error: "Crédits IA épuisés. Ajoutez du crédit dans les réglages Lovable." }), {
+        return new Response(JSON.stringify({ error: "Service momentanément indisponible." }), {
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
