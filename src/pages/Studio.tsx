@@ -135,11 +135,12 @@ const Studio = () => {
     const queue = photos.filter(p => p.status !== "done");
     if (!queue.length) { toast.info("Toutes tes photos sont déjà générées."); return; }
     setRunning(true);
-    // Sequential to respect rate limits
-    for (const item of queue) {
+    // Parallel batches of 3 for speed (Gemini supports it, hits target ~8s/photo perceived).
+    const CONCURRENCY = 3;
+    for (let i = 0; i < queue.length; i += CONCURRENCY) {
+      const slice = queue.slice(i, i + CONCURRENCY);
       // eslint-disable-next-line no-await-in-loop
-      await generateOne(item);
-      // Stop the batch if guest hit limit or credits ran out
+      await Promise.all(slice.map(item => generateOne(item)));
       if (!isAuthed && getGuestUsed() >= 1) break;
       if (isAuthed && credits !== null && credits <= 0) break;
     }
